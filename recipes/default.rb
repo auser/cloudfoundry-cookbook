@@ -61,7 +61,7 @@ end
 
 
 # Build mysql
-node[:mysql][:server_root_password] ||= Digest::MD5.hexdigest(Time.now.to_s)
+# node[:mysql][:server_root_password] ||= Digest::MD5.hexdigest(Time.now.to_s)
 include_recipe "mysql::server"
 %w(mysql-server ruby-dev libmysql-ruby libmysqlclient-dev).each do |pkg|
   package pkg do

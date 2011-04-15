@@ -24,7 +24,7 @@ This package depends on a few recipes being available:
     rabbitmq
     mongodb::source
 
-Add the recipe `vcap[default]` to your run list and you're good to go!
+Add the recipe `recipe[default]` to your run list and you're good to go!
 
 License and Author
 ==================
