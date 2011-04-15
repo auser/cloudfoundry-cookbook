@@ -1,3 +1,12 @@
+#
+# Cookbook Name:: cloudfoundry
+# Recipe:: rvm
+#
+# Copyright 2011, Ari Lerner
+#
+# All rights reserved - Do Not Redistribute
+#
+
 group 'rvm'
 
 %w(coreutils autoconf curl git-core ruby bison build-essential zlib1g-dev libssl-dev libreadline5-dev).each do |pkg|
