@@ -178,7 +178,7 @@ end
 execute "Run rake bundler:install in vcap" do
   user node[:cloudfoundry][:user][:uid]
   cwd "#{cloudfoundry_dir}/vcap"
-  command "rake bundler:install"
+  command "rvm use ruby-1.9.2@global && rake bundler:install"
 end
 
 directory "/tmp/vcap-run" do
