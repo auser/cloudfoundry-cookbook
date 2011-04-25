@@ -4,7 +4,7 @@
 #
 # Copyright 2011, Ari Lerner
 #
-# All rights reserved - Do Not Redistribute
+# All rights reserved under license terms
 #
 
 require 'digest/md5'
@@ -159,28 +159,34 @@ template "/etc/nginx/nginx.conf" do
 end
 
 # This feels like a hack... something is up with vagrant
-directory "#{ENV["HOME"]}/.gem" do
+directory "#{node[:cloudfoundry][:user][:home_dir]}/.gem" do
   owner node[:cloudfoundry][:user][:uid]
   recursive true
   mode 0755
 end
 
-execute "Install bundler to the rvm ruby 1.9.2" do
-  command  <<-CODE
-    /bin/bash "/etc/profile.d/rvm.sh"
-    rvm use ruby-1.9.2@global
-    gem install bundler --no-ri --no-rdoc
-  CODE
-  not_if "gem list | grep bundler"
-end
-
 # TODO: MAKE THIS PRETTY
-execute "Run rake bundler:install in vcap" do
-  user node[:cloudfoundry][:user][:uid]
-  cwd "#{cloudfoundry_dir}/vcap"
-  command "rvm use ruby-1.9.2@global && rake bundler:install"
+Dir["#{cloudfoundry_dir}/vcap"].each do |dir|
+  if File.directory?(dir)
+    puts "Directory: #{dir}"
+  end
 end
 
+execute "install bundler in #{node[:cloudfoundry][:rvm][:default_ruby]} the default ruby" do
+  user "root"
+  group 'rvm'
+  command "rvm use #{node[:cloudfoundry][:rvm][:default_ruby]} && gem install bundler --no-ri --no-rdoc"
+  not_if "rvm use #{node[:cloudfoundry][:rvm][:default_ruby]} | gem list | grep 'bundler'"
+end
+
+execute "Run rake bundler:install in vcap" do
+  user "root"
+  cwd "#{cloudfoundry_dir}/vcap"
+  command "rvm use #{node[:cloudfoundry][:rvm][:default_ruby]} && rake bundler:install"
+  action :run
+end
+
+# This is because we are running as a lower user (kind of a hack)
 directory "/tmp/vcap-run" do
   owner node[:cloudfoundry][:user][:uid]
   group node[:cloudfoundry][:user][:gid]
@@ -190,5 +196,5 @@ end
 execute "Start cloudfoundry" do
   user node[:cloudfoundry][:user][:uid]
   cwd "#{cloudfoundry_dir}/vcap"
-  command "bin/vcap start"
+  command "rvm use #{node[:cloudfoundry][:rvm][:default_ruby]} && bin/vcap start"
 end
